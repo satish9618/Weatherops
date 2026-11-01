@@ -1,0 +1,181 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a101c">
+    <meta name="description" content="WeatherOps — an interactive cloud-native weather dashboard.">
+    <title>WeatherOps | Weather Dashboard</title>
+
+    <link rel="preconnect" href="https://unpkg.com">
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app">
+        <header class="topbar">
+            <a class="brand" href="#" aria-label="WeatherOps home">
+                <span class="brand-icon" aria-hidden="true">◉</span>
+                <span>Weather<span class="accent">Ops</span></span>
+            </a>
+
+            <div class="header-right">
+                <span class="environment">
+                    <span class="status-dot"></span>
+                    Weather service
+                </span>
+                <span class="version-label">DASHBOARD / V1</span>
+            </div>
+        </header>
+
+        <main>
+            <section class="intro">
+                <p class="eyebrow">WEATHER INTELLIGENCE</p>
+                <h1>Weather, at a <span class="accent">glance.</span></h1>
+                <p class="subtitle">
+                    Explore current conditions for any city or point on the map.
+                </p>
+            </section>
+
+            <section class="search-section" aria-label="Find weather">
+                <form id="search-form" class="search-form">
+                    <span class="search-icon" aria-hidden="true">⌕</span>
+                    <label class="sr-only" for="city-input">Search city</label>
+                    <input
+                        id="city-input"
+                        type="search"
+                        placeholder="Search a city, e.g. Chennai"
+                        autocomplete="off"
+                        maxlength="100"
+                    >
+                    <button id="search-button" type="submit">
+                        Search <span aria-hidden="true">↗</span>
+                    </button>
+                </form>
+
+                <button id="location-button" class="location-button" type="button">
+                    <span aria-hidden="true">◎</span>
+                    Use my location
+                </button>
+            </section>
+
+            <div id="message" class="message" role="status" aria-live="polite">
+                Ready to explore weather.
+            </div>
+
+            <section class="dashboard-grid" aria-label="Weather dashboard">
+                <article id="weather-panel" class="weather-panel">
+                    <div class="panel-topline">
+                        <span class="section-label">CURRENT CONDITIONS</span>
+                        <span class="live-label">
+                            <span class="status-dot"></span>
+                            Latest observation
+                        </span>
+                    </div>
+
+                    <div class="weather-heading">
+                        <div class="location-details">
+                            <h2 id="city-name">Search for a city</h2>
+                            <p id="coordinates" class="muted">
+                                Your weather will appear here
+                            </p>
+                        </div>
+                        <div id="weather-symbol" class="weather-symbol"
+                             aria-label="Weather condition">🌤️</div>
+                    </div>
+
+                    <div class="temperature-row">
+                        <div class="temperature">
+                            <span id="temperature">--</span><span class="degree">°</span>
+                        </div>
+
+                        <div class="condition">
+                            <p id="condition-text">Awaiting weather data</p>
+                            <p class="muted">
+                                Feels like <strong id="feels-like">--</strong>°C
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="metrics">
+                        <div class="metric-card">
+                            <span class="metric-icon" aria-hidden="true">◌</span>
+                            <div class="metric-copy">
+                                <p>Humidity</p>
+                                <strong id="humidity">--</strong>
+                                <span class="metric-unit">Relative humidity</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <span class="metric-icon" aria-hidden="true">≋</span>
+                            <div class="metric-copy">
+                                <p>Wind speed</p>
+                                <strong id="wind">--</strong>
+                                <span class="metric-unit">km/h</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <span class="metric-icon" aria-hidden="true">♧</span>
+                            <div class="metric-copy">
+                                <p>Precipitation</p>
+                                <strong id="precipitation">--</strong>
+                                <span class="metric-unit">mm</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="weather-footer">
+                        <span>Data source <strong id="provider">Open-Meteo</strong></span>
+                        <span>Observed <strong id="updated-at">Waiting…</strong></span>
+                    </div>
+                </article>
+
+                <section class="map-section" aria-labelledby="map-title">
+                    <div class="map-heading">
+                        <div>
+                            <p class="section-label">EXPLORE</p>
+                            <h2 id="map-title">Weather map</h2>
+                            <p class="map-description">
+                                Select any point to check its weather.
+                            </p>
+                        </div>
+                        <span class="map-badge">INTERACTIVE</span>
+                    </div>
+
+                    <div class="map-frame">
+                        <div id="weather-map"
+                             role="application"
+                             aria-label="Interactive map. Select a location to load its weather."></div>
+
+                        <div class="map-overlay">
+                            <span class="map-overlay-dot"></span>
+                            Click or tap to explore
+                        </div>
+                    </div>
+
+                    <p class="map-hint">
+                        <span aria-hidden="true">ⓘ</span>
+                        Drag to pan · Use +/− to zoom · Select a location for weather
+                    </p>
+                </section>
+            </section>
+        </main>
+
+        <footer class="page-footer">
+            <span>
+                WeatherOps <span class="footer-separator">/</span>
+                Cloud-native weather platform
+            </span>
+            <span>Weather data by Open-Meteo · Map © OpenStreetMap contributors</span>
+        </footer>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
