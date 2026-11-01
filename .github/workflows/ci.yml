@@ -1,4 +1,4 @@
-
+cat > .github/workflows/ci.yml <<'EOF'
 name: WeatherOps CI/CD
 
 on:
@@ -11,7 +11,8 @@ permissions:
   contents: read
 
 jobs:
-  test-and-push:
+  test:
+    name: Test Backend
     runs-on: ubuntu-latest
 
     steps:
@@ -32,6 +33,16 @@ jobs:
       - name: Run backend tests
         run: python -m pytest tests/ -v
 
+  build-and-deploy:
+    name: Build, Push and Deploy to EKS
+    needs: test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -41,7 +52,6 @@ jobs:
           aws-region: us-east-1
 
       - name: Login to Amazon ECR
-        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Set up Docker Buildx
@@ -66,3 +76,33 @@ jobs:
           tags: |
             357660358977.dkr.ecr.us-east-1.amazonaws.com/weatherops-frontend:latest
             357660358977.dkr.ecr.us-east-1.amazonaws.com/weatherops-frontend:${{ github.sha }}
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.36.1'
+
+      - name: Connect to EKS
+        run: |
+          aws eks update-kubeconfig \
+            --region us-east-1 \
+            --name weatherops-eks
+
+      - name: Deploy backend
+        run: |
+          kubectl set image deployment/weatherops-backend \
+            backend=357660358977.dkr.ecr.us-east-1.amazonaws.com/weatherops-backend:${{ github.sha }} \
+            -n weatherops
+
+      - name: Deploy frontend
+        run: |
+          kubectl set image deployment/weatherops-frontend \
+            frontend=357660358977.dkr.ecr.us-east-1.amazonaws.com/weatherops-frontend:${{ github.sha }} \
+            -n weatherops
+
+      - name: Verify deployments
+        run: |
+          kubectl rollout status deployment/weatherops-backend -n weatherops --timeout=180s
+          kubectl rollout status deployment/weatherops-frontend -n weatherops --timeout=180s
+          kubectl get pods -n weatherops
+EOF
