@@ -104,4 +104,3 @@ jobs:
           kubectl rollout status deployment/weatherops-backend -n weatherops --timeout=180s
           kubectl rollout status deployment/weatherops-frontend -n weatherops --timeout=180s
           kubectl get pods -n weatherops
-EOF
