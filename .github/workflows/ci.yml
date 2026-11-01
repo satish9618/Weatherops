@@ -1,5 +1,5 @@
 
-name: WeatherOps CI
+name: WeatherOps CI/CD
 
 on:
   push:
@@ -7,8 +7,11 @@ on:
   pull_request:
     branches: [main, master]
 
+permissions:
+  contents: read
+
 jobs:
-  test-and-build:
+  test-and-push:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,21 +32,37 @@ jobs:
       - name: Run backend tests
         run: python -m pytest tests/ -v
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build backend Docker image
+      - name: Build and push backend
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
-          push: false
-          tags: weatherops-backend:ci
+          push: true
+          tags: |
+            357660358977.dkr.ecr.us-east-1.amazonaws.com/weatherops-backend:latest
+            357660358977.dkr.ecr.us-east-1.amazonaws.com/weatherops-backend:${{ github.sha }}
 
-      - name: Build frontend Docker image
+      - name: Build and push frontend
         uses: docker/build-push-action@v6
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
-          push: false
-          tags: weatherops-frontend:ci
+          push: true
+          tags: |
+            357660358977.dkr.ecr.us-east-1.amazonaws.com/weatherops-frontend:latest
+            357660358977.dkr.ecr.us-east-1.amazonaws.com/weatherops-frontend:${{ github.sha }}
